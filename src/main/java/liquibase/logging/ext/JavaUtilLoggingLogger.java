@@ -1,6 +1,6 @@
 /* -*- mode: Java; c-basic-offset: 2; indent-tabs-mode: nil -*-
  *
- * Copyright (c) 2010-2011 Laird Nelson.
+ * Copyright (c) 2011-2011 Laird Nelson.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -27,6 +27,7 @@
  */
 package liquibase.logging.ext;
 
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,30 +39,79 @@ import java.util.logging.Logger;
 import liquibase.logging.LogLevel;
 
 import liquibase.logging.core.AbstractLogger;
+import liquibase.logging.core.DefaultLogger; // for javadoc only
 
+import liquibase.servicelocator.PrioritizedService; // for javadoc only
+
+/**
+ * An {@link AbstractLogger} that adapts the Java logging mechanism to
+ * the <a href="http://liquibase.org">Liquibase</a> {@linkplain
+ * liquibase.logging.Logger logging contracts}.
+ *
+ * @author <a href="mailto:ljnelson@gmail.com">Laird Nelson</a>
+ *
+ * @version 1.0
+ *
+ * @since 1.0
+ */
 public class JavaUtilLoggingLogger extends AbstractLogger {
 
-  public static final Map<LogLevel, Level> levels = new EnumMap<LogLevel, Level>(LogLevel.class);
+  /**
+   * An immutable {@link Map} of <a
+   * href="http://liquibase.org">Liquibase</a> {@link LogLevel}
+   * instances to {@link java.util.logging.Level} instances.  This
+   * field is never {@code null} and is threadsafe.
+   */
+  public static final Map<LogLevel, Level> levels;
 
+  /**
+   * Static initializer; initializes the {@link #levels} field.
+   */
   static {
-    levels.put(LogLevel.OFF, Level.OFF);
-    levels.put(LogLevel.DEBUG, Level.FINER);
-    levels.put(LogLevel.INFO, Level.INFO);
-    levels.put(LogLevel.WARNING, Level.WARNING);
-    levels.put(LogLevel.SEVERE, Level.SEVERE);
+    final Map<LogLevel, Level> levelMap = new EnumMap<LogLevel, Level>(LogLevel.class);
+    levelMap.put(LogLevel.OFF, Level.OFF);
+    levelMap.put(LogLevel.DEBUG, Level.FINER);
+    levelMap.put(LogLevel.INFO, Level.INFO);
+    levelMap.put(LogLevel.WARNING, Level.WARNING);
+    levelMap.put(LogLevel.SEVERE, Level.SEVERE);
+    levels = Collections.unmodifiableMap(levelMap);
   }
 
+  /**
+   * The underlying {@link Logger} that this {@link
+   * JavaUtilLoggingLogger} delegates to.  This field may be {@code
+   * null} at any point.
+   */
   private transient Logger logger;
-  
+
+  /**
+   * Creates a new {@link JavaUtilLoggingLogger}.  Following <a
+   * href="http://liquibase.org/">Liquibase</a> convention, callers
+   * should immediately call {@link #setName(String)} after
+   * construction.
+   */
   public JavaUtilLoggingLogger() {
     super();
   }
   
+  /**
+   * Returns {@code 3} when invoked.
+   *
+   * @see PrioritizedService#getPriority()
+   */
   @Override
-  public final int getPriority() {
+  public int getPriority() {
     return 3; // arbitrary number greater than 1
   }
   
+  /**
+   * Sets this {@link JavaUtilLoggingLogger}'s log level to the
+   * supplied {@link LogLevel} and sets its underlying {@link Logger}
+   * implementation's {@linkplain Logger#getLevel() level} as well.
+   *
+   * @param level the new {@link LogLevel}; may be {@code null} in
+   * which case {@link Level#OFF} will be used instead
+   */
   @Override
   public void setLogLevel(final LogLevel level) {
     super.setLogLevel(level);
@@ -75,11 +125,41 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
     }
   }
 
+  /**
+   * Emulates the behavior of <a
+   * href="http://liquibase.org">Liquibase</a>'s {@link
+   * DefaultLogger#setLogLevel(String, String)} method by simply
+   * ignoring the second argument.  This method calls {@link
+   * AbstractLogger#setLogLevel(String)}.
+   *
+   * @param logLevel the new log level; may be {@code null}
+   *
+   * @param fileName ignored; the {@linkplain AbstractLogger
+   * superclass} does not document what this parameter is to be used
+   * for or what its permissible values are
+   */
   @Override
   public void setLogLevel(final String logLevel, final String fileName) {
     this.setLogLevel(logLevel); // emulates DefaultLogger behavior
   }
   
+  /**
+   * Returns the {@link LogLevel} that was previously {@linkplain
+   * #setLogLevel(LogLevel) set} on this {@link
+   * JavaUtilLoggingLogger}.
+   *
+   * <p>This implementation actually reverse engineers the {@link
+   * LogLevel} by inspecting the {@link Logger#getLevel()} of the
+   * underlying Java {@link Logger}, and using the {@link #levels}
+   * {@link Map} to locate the proper {@link LogLevel}.  This allows
+   * subclasses or future versions of this class to safely expose the
+   * underlying {@link Logger} if deemed necessary.</p>
+   *
+   * <p>This method may return {@code null}.</p>
+   *
+   * @return the {@link LogLevel} used by this {@link
+   * JavaUtilLoggingLogger} instance, or {@code null}
+   */
   @Override
   public LogLevel getLogLevel() {
     if (this.logger == null) {
@@ -101,13 +181,37 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
     throw new IllegalStateException();
   }
   
+  /**
+   * Sets the name of this {@link JavaUtilLoggingLogger}.
+   *
+   * <p>This method will initialize the underlying {@link Logger} with
+   * a call to the {@link Logger#getLogger(String)} method, passing
+   * the supplied {@code name} parameter.</p>
+   *
+   * @param name the name; may be {@code null}
+   */
   @Override
   public void setName(final String name) {
     this.logger = Logger.getLogger(name);
   }
 
+  /**
+   * Returns the {@link StackTraceElement} representing the closest
+   * method invocation that is <em>not</em> an invocation of a method
+   * in this class, its superclasses or {@link java.lang.Thread}.
+   *
+   * <p>This method is used by others in this class to find the class
+   * name and method name to pass to the underlying Java {@link
+   * Logger}s when actually performing logging.</p>
+   *
+   * <p>This method may return {@code null}.</p>
+   *
+   * @return the nearest valid {@link StackTraceElement}, or {@code
+   * null}
+   */
   private final StackTraceElement getCaller() {
     StackTraceElement returnValue = null;
+    // TODO: doPrivileged
     final StackTraceElement[] st = Thread.currentThread().getStackTrace();
     if (st != null && st.length > 0) {
       for (final StackTraceElement element : st) {
@@ -123,11 +227,27 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
     return returnValue;
   }
   
+  /**
+   * Calls the {@link #info(String, Throwable)} method, passing {@code
+   * null} as the second argument.
+   *
+   * @param message the message to log; may be {@code null}
+   */
   @Override
   public void info(final String message) {
     this.info(message, null);
   }
   
+  /**
+   * Logs the supplied message {@link String} and (optional) {@link
+   * Throwable} to the underlying {@link Logger} at the {@link
+   * Level#INFO INFO} level.
+   *
+   * @param message the message to log; may be {@code null}
+   *
+   * @param throwable the {@link Throwable} to log; may be {@code
+   * null}
+   */
   @Override
   public void info(final String message, final Throwable throwable) {
     if (this.logger != null && this.logger.isLoggable(Level.INFO)) {
@@ -140,11 +260,27 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
     }
   }
   
+  /**
+   * Calls the {@link #warning(String, Throwable)} method, passing {@code
+   * null} as the second argument.
+   *
+   * @param message the message to log; may be {@code null}
+   */
   @Override
   public void warning(final String message) {
     this.warning(message, null);
   }
   
+  /**
+   * Logs the supplied message {@link String} and (optional) {@link
+   * Throwable} to the underlying {@link Logger} at the {@link
+   * Level#WARNING WARNING} level.
+   *
+   * @param message the message to log; may be {@code null}
+   *
+   * @param throwable the {@link Throwable} to log; may be {@code
+   * null}
+   */
   @Override
   public void warning(final String message, final Throwable throwable) {
     if (this.logger != null && this.logger.isLoggable(Level.WARNING)) {
@@ -157,11 +293,27 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
     }
   }
 
+  /**
+   * Calls the {@link #severe(String, Throwable)} method, passing {@code
+   * null} as the second argument.
+   *
+   * @param message the message to log; may be {@code null}
+   */
   @Override
   public void severe(final String message) {
     this.severe(message, null);
   }
 
+  /**
+   * Logs the supplied message {@link String} and (optional) {@link
+   * Throwable} to the underlying {@link Logger} at the {@link
+   * Level#SEVERE SEVERE} level.
+   *
+   * @param message the message to log; may be {@code null}
+   *
+   * @param throwable the {@link Throwable} to log; may be {@code
+   * null}
+   */
   @Override
   public void severe(final String message, final Throwable throwable) {
     if (this.logger != null && this.logger.isLoggable(Level.SEVERE)) {
@@ -174,11 +326,27 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
     }
   }
 
+  /**
+   * Calls the {@link #debug(String, Throwable)} method, passing {@code
+   * null} as the second argument.
+   *
+   * @param message the message to log; may be {@code null}
+   */
   @Override
   public void debug(final String message) {
     this.debug(message, null);
   }
 
+  /**
+   * Logs the supplied message {@link String} and (optional) {@link
+   * Throwable} to the underlying {@link Logger} at the {@link
+   * Level#FINER FINER} level.
+   *
+   * @param message the message to log; may be {@code null}
+   *
+   * @param throwable the {@link Throwable} to log; may be {@code
+   * null}
+   */
   @Override
   public void debug(final String message, final Throwable throwable) {
     if (this.logger != null && this.logger.isLoggable(Level.FINER)) {
