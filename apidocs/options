@@ -1,0 +1,34 @@
+-classpath
+'/Users/ljnelson/Projects/github/liquibase-jul/target/classes:/Users/ljnelson/.m2/repository/org/liquibase/liquibase-core/2.0.3/liquibase-core-2.0.3.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'/Users/ljnelson/Projects/github/liquibase-jul/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2011 <a href="http://about.me/lairdnelson">Laird Nelson</a>. All Rights Reserved.'
+-charset
+'UTF-8'
+-d
+'/Users/ljnelson/Projects/github/liquibase-jul/target/site/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'Liquibase java.util.logging Extension 1.2-SNAPSHOT API'
+-link
+'http://docs.oracle.com/javase/6/docs/api'
+-link
+' http://www.liquibase.org/api'
+-link
+' http://kentbeck.github.com/junit/javadoc/latest'
+-linkoffline
+'http://download.oracle.com/javase/6/docs/api' '/Users/ljnelson/Projects/github/liquibase-jul/target/javadoc-bundle-options'
+-sourcetab
+2
+-stylesheetfile
+'/Users/ljnelson/Projects/github/liquibase-jul/target/site/apidocs/stylesheet.css'
+-use
+-version
+-windowtitle
+'Liquibase java.util.logging Extension 1.2-SNAPSHOT API'

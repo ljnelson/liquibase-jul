@@ -1,0 +1,429 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    /* -*- mode: Java; c-basic-offset: 2; indent-tabs-mode: nil -*-<a name="line.1"></a>
+<FONT color="green">002</FONT>     *<a name="line.2"></a>
+<FONT color="green">003</FONT>     * Copyright (c) 2011-2011 Laird Nelson.<a name="line.3"></a>
+<FONT color="green">004</FONT>     *<a name="line.4"></a>
+<FONT color="green">005</FONT>     * Permission is hereby granted, free of charge, to any person<a name="line.5"></a>
+<FONT color="green">006</FONT>     * obtaining a copy of this software and associated documentation<a name="line.6"></a>
+<FONT color="green">007</FONT>     * files (the "Software"), to deal in the Software without<a name="line.7"></a>
+<FONT color="green">008</FONT>     * restriction, including without limitation the rights to use, copy,<a name="line.8"></a>
+<FONT color="green">009</FONT>     * modify, merge, publish, distribute, sublicense and/or sell copies<a name="line.9"></a>
+<FONT color="green">010</FONT>     * of the Software, and to permit persons to whom the Software is<a name="line.10"></a>
+<FONT color="green">011</FONT>     * furnished to do so, subject to the following conditions:<a name="line.11"></a>
+<FONT color="green">012</FONT>     * <a name="line.12"></a>
+<FONT color="green">013</FONT>     * The above copyright notice and this permission notice shall be<a name="line.13"></a>
+<FONT color="green">014</FONT>     * included in all copies or substantial portions of the Software.<a name="line.14"></a>
+<FONT color="green">015</FONT>     * <a name="line.15"></a>
+<FONT color="green">016</FONT>     * THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,<a name="line.16"></a>
+<FONT color="green">017</FONT>     * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF<a name="line.17"></a>
+<FONT color="green">018</FONT>     * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND<a name="line.18"></a>
+<FONT color="green">019</FONT>     * NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT<a name="line.19"></a>
+<FONT color="green">020</FONT>     * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,<a name="line.20"></a>
+<FONT color="green">021</FONT>     * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,<a name="line.21"></a>
+<FONT color="green">022</FONT>     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER<a name="line.22"></a>
+<FONT color="green">023</FONT>     * DEALINGS IN THE SOFTWARE.<a name="line.23"></a>
+<FONT color="green">024</FONT>     *<a name="line.24"></a>
+<FONT color="green">025</FONT>     * The original copy of this license is available at<a name="line.25"></a>
+<FONT color="green">026</FONT>     * http://www.opensource.org/license/mit-license.html.<a name="line.26"></a>
+<FONT color="green">027</FONT>     */<a name="line.27"></a>
+<FONT color="green">028</FONT>    package liquibase.logging.ext;<a name="line.28"></a>
+<FONT color="green">029</FONT>    <a name="line.29"></a>
+<FONT color="green">030</FONT>    import java.util.Collections;<a name="line.30"></a>
+<FONT color="green">031</FONT>    import java.util.EnumMap;<a name="line.31"></a>
+<FONT color="green">032</FONT>    import java.util.Map;<a name="line.32"></a>
+<FONT color="green">033</FONT>    import java.util.Map.Entry;<a name="line.33"></a>
+<FONT color="green">034</FONT>    import java.util.Set;<a name="line.34"></a>
+<FONT color="green">035</FONT>    <a name="line.35"></a>
+<FONT color="green">036</FONT>    import java.util.logging.Level;<a name="line.36"></a>
+<FONT color="green">037</FONT>    import java.util.logging.Logger;<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>    import liquibase.logging.LogLevel;<a name="line.39"></a>
+<FONT color="green">040</FONT>    <a name="line.40"></a>
+<FONT color="green">041</FONT>    import liquibase.logging.core.AbstractLogger;<a name="line.41"></a>
+<FONT color="green">042</FONT>    import liquibase.logging.core.DefaultLogger; // for javadoc only<a name="line.42"></a>
+<FONT color="green">043</FONT>    <a name="line.43"></a>
+<FONT color="green">044</FONT>    import liquibase.servicelocator.PrioritizedService; // for javadoc only<a name="line.44"></a>
+<FONT color="green">045</FONT>    <a name="line.45"></a>
+<FONT color="green">046</FONT>    /**<a name="line.46"></a>
+<FONT color="green">047</FONT>     * An {@link AbstractLogger} that adapts the Java logging mechanism to<a name="line.47"></a>
+<FONT color="green">048</FONT>     * the &lt;a href="http://liquibase.org"&gt;Liquibase&lt;/a&gt; {@linkplain<a name="line.48"></a>
+<FONT color="green">049</FONT>     * liquibase.logging.Logger logging contracts}.<a name="line.49"></a>
+<FONT color="green">050</FONT>     *<a name="line.50"></a>
+<FONT color="green">051</FONT>     * @author &lt;a href="mailto:ljnelson@gmail.com"&gt;Laird Nelson&lt;/a&gt;<a name="line.51"></a>
+<FONT color="green">052</FONT>     *<a name="line.52"></a>
+<FONT color="green">053</FONT>     * @version 1.0<a name="line.53"></a>
+<FONT color="green">054</FONT>     *<a name="line.54"></a>
+<FONT color="green">055</FONT>     * @since 1.0<a name="line.55"></a>
+<FONT color="green">056</FONT>     */<a name="line.56"></a>
+<FONT color="green">057</FONT>    public class JavaUtilLoggingLogger extends AbstractLogger {<a name="line.57"></a>
+<FONT color="green">058</FONT>    <a name="line.58"></a>
+<FONT color="green">059</FONT>      /**<a name="line.59"></a>
+<FONT color="green">060</FONT>       * An immutable {@link Map} of &lt;a<a name="line.60"></a>
+<FONT color="green">061</FONT>       * href="http://liquibase.org"&gt;Liquibase&lt;/a&gt; {@link LogLevel}<a name="line.61"></a>
+<FONT color="green">062</FONT>       * instances to {@link java.util.logging.Level} instances.  This<a name="line.62"></a>
+<FONT color="green">063</FONT>       * field is never {@code null} and is threadsafe.<a name="line.63"></a>
+<FONT color="green">064</FONT>       */<a name="line.64"></a>
+<FONT color="green">065</FONT>      public static final Map&lt;LogLevel, Level&gt; levels;<a name="line.65"></a>
+<FONT color="green">066</FONT>    <a name="line.66"></a>
+<FONT color="green">067</FONT>      /**<a name="line.67"></a>
+<FONT color="green">068</FONT>       * Static initializer; initializes the {@link #levels} field.<a name="line.68"></a>
+<FONT color="green">069</FONT>       */<a name="line.69"></a>
+<FONT color="green">070</FONT>      static {<a name="line.70"></a>
+<FONT color="green">071</FONT>        final Map&lt;LogLevel, Level&gt; levelMap = new EnumMap&lt;LogLevel, Level&gt;(LogLevel.class);<a name="line.71"></a>
+<FONT color="green">072</FONT>        levelMap.put(LogLevel.OFF, Level.OFF);<a name="line.72"></a>
+<FONT color="green">073</FONT>        levelMap.put(LogLevel.DEBUG, Level.FINER);<a name="line.73"></a>
+<FONT color="green">074</FONT>        levelMap.put(LogLevel.INFO, Level.INFO);<a name="line.74"></a>
+<FONT color="green">075</FONT>        levelMap.put(LogLevel.WARNING, Level.WARNING);<a name="line.75"></a>
+<FONT color="green">076</FONT>        levelMap.put(LogLevel.SEVERE, Level.SEVERE);<a name="line.76"></a>
+<FONT color="green">077</FONT>        levels = Collections.unmodifiableMap(levelMap);<a name="line.77"></a>
+<FONT color="green">078</FONT>      }<a name="line.78"></a>
+<FONT color="green">079</FONT>    <a name="line.79"></a>
+<FONT color="green">080</FONT>      /**<a name="line.80"></a>
+<FONT color="green">081</FONT>       * The underlying {@link Logger} that this {@link<a name="line.81"></a>
+<FONT color="green">082</FONT>       * JavaUtilLoggingLogger} delegates to.  This field may be {@code<a name="line.82"></a>
+<FONT color="green">083</FONT>       * null} at any point.<a name="line.83"></a>
+<FONT color="green">084</FONT>       */<a name="line.84"></a>
+<FONT color="green">085</FONT>      private transient Logger logger;<a name="line.85"></a>
+<FONT color="green">086</FONT>    <a name="line.86"></a>
+<FONT color="green">087</FONT>      /**<a name="line.87"></a>
+<FONT color="green">088</FONT>       * Creates a new {@link JavaUtilLoggingLogger}.  Following &lt;a<a name="line.88"></a>
+<FONT color="green">089</FONT>       * href="http://liquibase.org/"&gt;Liquibase&lt;/a&gt; convention, callers<a name="line.89"></a>
+<FONT color="green">090</FONT>       * should immediately call {@link #setName(String)} after<a name="line.90"></a>
+<FONT color="green">091</FONT>       * construction.<a name="line.91"></a>
+<FONT color="green">092</FONT>       */<a name="line.92"></a>
+<FONT color="green">093</FONT>      public JavaUtilLoggingLogger() {<a name="line.93"></a>
+<FONT color="green">094</FONT>        super();<a name="line.94"></a>
+<FONT color="green">095</FONT>      }<a name="line.95"></a>
+<FONT color="green">096</FONT>      <a name="line.96"></a>
+<FONT color="green">097</FONT>      /**<a name="line.97"></a>
+<FONT color="green">098</FONT>       * Returns {@code 3} when invoked.<a name="line.98"></a>
+<FONT color="green">099</FONT>       *<a name="line.99"></a>
+<FONT color="green">100</FONT>       * @see PrioritizedService#getPriority()<a name="line.100"></a>
+<FONT color="green">101</FONT>       */<a name="line.101"></a>
+<FONT color="green">102</FONT>      @Override<a name="line.102"></a>
+<FONT color="green">103</FONT>      public int getPriority() {<a name="line.103"></a>
+<FONT color="green">104</FONT>        return 3; // arbitrary number greater than 1<a name="line.104"></a>
+<FONT color="green">105</FONT>      }<a name="line.105"></a>
+<FONT color="green">106</FONT>      <a name="line.106"></a>
+<FONT color="green">107</FONT>      /**<a name="line.107"></a>
+<FONT color="green">108</FONT>       * Sets this {@link JavaUtilLoggingLogger}'s log level to the<a name="line.108"></a>
+<FONT color="green">109</FONT>       * supplied {@link LogLevel} and sets its underlying {@link Logger}<a name="line.109"></a>
+<FONT color="green">110</FONT>       * implementation's {@linkplain Logger#getLevel() level} as well.<a name="line.110"></a>
+<FONT color="green">111</FONT>       *<a name="line.111"></a>
+<FONT color="green">112</FONT>       * @param level the new {@link LogLevel}; may be {@code null} in<a name="line.112"></a>
+<FONT color="green">113</FONT>       * which case {@link Level#OFF} will be used instead<a name="line.113"></a>
+<FONT color="green">114</FONT>       */<a name="line.114"></a>
+<FONT color="green">115</FONT>      @Override<a name="line.115"></a>
+<FONT color="green">116</FONT>      public void setLogLevel(final LogLevel level) {<a name="line.116"></a>
+<FONT color="green">117</FONT>        super.setLogLevel(level);<a name="line.117"></a>
+<FONT color="green">118</FONT>        if (this.logger != null &amp;&amp; level != null) {<a name="line.118"></a>
+<FONT color="green">119</FONT>          final Level l = levels.get(level);<a name="line.119"></a>
+<FONT color="green">120</FONT>          if (l == null) {<a name="line.120"></a>
+<FONT color="green">121</FONT>            this.logger.setLevel(Level.OFF);<a name="line.121"></a>
+<FONT color="green">122</FONT>          } else {<a name="line.122"></a>
+<FONT color="green">123</FONT>            this.logger.setLevel(l);<a name="line.123"></a>
+<FONT color="green">124</FONT>          }<a name="line.124"></a>
+<FONT color="green">125</FONT>        }<a name="line.125"></a>
+<FONT color="green">126</FONT>      }<a name="line.126"></a>
+<FONT color="green">127</FONT>    <a name="line.127"></a>
+<FONT color="green">128</FONT>      /**<a name="line.128"></a>
+<FONT color="green">129</FONT>       * Emulates the behavior of &lt;a<a name="line.129"></a>
+<FONT color="green">130</FONT>       * href="http://liquibase.org"&gt;Liquibase&lt;/a&gt;'s {@link<a name="line.130"></a>
+<FONT color="green">131</FONT>       * DefaultLogger#setLogLevel(String, String)} method by simply<a name="line.131"></a>
+<FONT color="green">132</FONT>       * ignoring the second argument.  This method calls {@link<a name="line.132"></a>
+<FONT color="green">133</FONT>       * AbstractLogger#setLogLevel(String)}.<a name="line.133"></a>
+<FONT color="green">134</FONT>       *<a name="line.134"></a>
+<FONT color="green">135</FONT>       * @param logLevel the new log level; may be {@code null}<a name="line.135"></a>
+<FONT color="green">136</FONT>       *<a name="line.136"></a>
+<FONT color="green">137</FONT>       * @param fileName ignored; the {@linkplain AbstractLogger<a name="line.137"></a>
+<FONT color="green">138</FONT>       * superclass} does not document what this parameter is to be used<a name="line.138"></a>
+<FONT color="green">139</FONT>       * for or what its permissible values are<a name="line.139"></a>
+<FONT color="green">140</FONT>       */<a name="line.140"></a>
+<FONT color="green">141</FONT>      @Override<a name="line.141"></a>
+<FONT color="green">142</FONT>      public void setLogLevel(final String logLevel, final String fileName) {<a name="line.142"></a>
+<FONT color="green">143</FONT>        this.setLogLevel(logLevel); // emulates DefaultLogger behavior<a name="line.143"></a>
+<FONT color="green">144</FONT>      }<a name="line.144"></a>
+<FONT color="green">145</FONT>      <a name="line.145"></a>
+<FONT color="green">146</FONT>      /**<a name="line.146"></a>
+<FONT color="green">147</FONT>       * Returns the {@link LogLevel} that was previously {@linkplain<a name="line.147"></a>
+<FONT color="green">148</FONT>       * #setLogLevel(LogLevel) set} on this {@link<a name="line.148"></a>
+<FONT color="green">149</FONT>       * JavaUtilLoggingLogger}.<a name="line.149"></a>
+<FONT color="green">150</FONT>       *<a name="line.150"></a>
+<FONT color="green">151</FONT>       * &lt;p&gt;This implementation actually reverse engineers the {@link<a name="line.151"></a>
+<FONT color="green">152</FONT>       * LogLevel} by inspecting the {@link Logger#getLevel()} of the<a name="line.152"></a>
+<FONT color="green">153</FONT>       * underlying Java {@link Logger}, and using the {@link #levels}<a name="line.153"></a>
+<FONT color="green">154</FONT>       * {@link Map} to locate the proper {@link LogLevel}.  This allows<a name="line.154"></a>
+<FONT color="green">155</FONT>       * subclasses or future versions of this class to safely expose the<a name="line.155"></a>
+<FONT color="green">156</FONT>       * underlying {@link Logger} if deemed necessary.&lt;/p&gt;<a name="line.156"></a>
+<FONT color="green">157</FONT>       *<a name="line.157"></a>
+<FONT color="green">158</FONT>       * &lt;p&gt;This method may return {@code null}.&lt;/p&gt;<a name="line.158"></a>
+<FONT color="green">159</FONT>       *<a name="line.159"></a>
+<FONT color="green">160</FONT>       * @return the {@link LogLevel} used by this {@link<a name="line.160"></a>
+<FONT color="green">161</FONT>       * JavaUtilLoggingLogger} instance, or {@code null}<a name="line.161"></a>
+<FONT color="green">162</FONT>       */<a name="line.162"></a>
+<FONT color="green">163</FONT>      @Override<a name="line.163"></a>
+<FONT color="green">164</FONT>      public LogLevel getLogLevel() {<a name="line.164"></a>
+<FONT color="green">165</FONT>        if (this.logger == null) {<a name="line.165"></a>
+<FONT color="green">166</FONT>          return super.getLogLevel();<a name="line.166"></a>
+<FONT color="green">167</FONT>        }<a name="line.167"></a>
+<FONT color="green">168</FONT>        final Level level = this.logger.getLevel();<a name="line.168"></a>
+<FONT color="green">169</FONT>        if (level == null) {<a name="line.169"></a>
+<FONT color="green">170</FONT>          return LogLevel.OFF;<a name="line.170"></a>
+<FONT color="green">171</FONT>        }<a name="line.171"></a>
+<FONT color="green">172</FONT>        final Set&lt;Entry&lt;LogLevel, Level&gt;&gt; entrySet = levels.entrySet();<a name="line.172"></a>
+<FONT color="green">173</FONT>        assert entrySet != null;<a name="line.173"></a>
+<FONT color="green">174</FONT>        assert !entrySet.isEmpty();<a name="line.174"></a>
+<FONT color="green">175</FONT>        for (final Entry&lt;LogLevel, Level&gt; entry : entrySet) {<a name="line.175"></a>
+<FONT color="green">176</FONT>          assert entry != null;<a name="line.176"></a>
+<FONT color="green">177</FONT>          if (level.equals(entry.getValue())) {<a name="line.177"></a>
+<FONT color="green">178</FONT>            return entry.getKey();<a name="line.178"></a>
+<FONT color="green">179</FONT>          }<a name="line.179"></a>
+<FONT color="green">180</FONT>        }<a name="line.180"></a>
+<FONT color="green">181</FONT>        throw new IllegalStateException();<a name="line.181"></a>
+<FONT color="green">182</FONT>      }<a name="line.182"></a>
+<FONT color="green">183</FONT>      <a name="line.183"></a>
+<FONT color="green">184</FONT>      /**<a name="line.184"></a>
+<FONT color="green">185</FONT>       * Sets the name of this {@link JavaUtilLoggingLogger}.<a name="line.185"></a>
+<FONT color="green">186</FONT>       *<a name="line.186"></a>
+<FONT color="green">187</FONT>       * &lt;p&gt;This method will initialize the underlying {@link Logger} with<a name="line.187"></a>
+<FONT color="green">188</FONT>       * a call to the {@link Logger#getLogger(String)} method, passing<a name="line.188"></a>
+<FONT color="green">189</FONT>       * the supplied {@code name} parameter.&lt;/p&gt;<a name="line.189"></a>
+<FONT color="green">190</FONT>       *<a name="line.190"></a>
+<FONT color="green">191</FONT>       * @param name the name; may be {@code null}<a name="line.191"></a>
+<FONT color="green">192</FONT>       */<a name="line.192"></a>
+<FONT color="green">193</FONT>      @Override<a name="line.193"></a>
+<FONT color="green">194</FONT>      public void setName(final String name) {<a name="line.194"></a>
+<FONT color="green">195</FONT>        this.logger = Logger.getLogger(name);<a name="line.195"></a>
+<FONT color="green">196</FONT>      }<a name="line.196"></a>
+<FONT color="green">197</FONT>    <a name="line.197"></a>
+<FONT color="green">198</FONT>      /**<a name="line.198"></a>
+<FONT color="green">199</FONT>       * Returns the {@link StackTraceElement} representing the closest<a name="line.199"></a>
+<FONT color="green">200</FONT>       * method invocation that is &lt;em&gt;not&lt;/em&gt; an invocation of a method<a name="line.200"></a>
+<FONT color="green">201</FONT>       * in this class, its superclasses or {@link java.lang.Thread}.<a name="line.201"></a>
+<FONT color="green">202</FONT>       *<a name="line.202"></a>
+<FONT color="green">203</FONT>       * &lt;p&gt;This method is used by others in this class to find the class<a name="line.203"></a>
+<FONT color="green">204</FONT>       * name and method name to pass to the underlying Java {@link<a name="line.204"></a>
+<FONT color="green">205</FONT>       * Logger}s when actually performing logging.&lt;/p&gt;<a name="line.205"></a>
+<FONT color="green">206</FONT>       *<a name="line.206"></a>
+<FONT color="green">207</FONT>       * &lt;p&gt;This method may return {@code null}.&lt;/p&gt;<a name="line.207"></a>
+<FONT color="green">208</FONT>       *<a name="line.208"></a>
+<FONT color="green">209</FONT>       * @return the nearest valid {@link StackTraceElement}, or {@code<a name="line.209"></a>
+<FONT color="green">210</FONT>       * null}<a name="line.210"></a>
+<FONT color="green">211</FONT>       */<a name="line.211"></a>
+<FONT color="green">212</FONT>      private final StackTraceElement getCaller() {<a name="line.212"></a>
+<FONT color="green">213</FONT>        StackTraceElement returnValue = null;<a name="line.213"></a>
+<FONT color="green">214</FONT>        // TODO: doPrivileged<a name="line.214"></a>
+<FONT color="green">215</FONT>        final StackTraceElement[] st = Thread.currentThread().getStackTrace();<a name="line.215"></a>
+<FONT color="green">216</FONT>        if (st != null &amp;&amp; st.length &gt; 0) {<a name="line.216"></a>
+<FONT color="green">217</FONT>          for (final StackTraceElement element : st) {<a name="line.217"></a>
+<FONT color="green">218</FONT>            if (element != null &amp;&amp; element.getMethodName() != null) {<a name="line.218"></a>
+<FONT color="green">219</FONT>              final String className = element.getClassName();<a name="line.219"></a>
+<FONT color="green">220</FONT>              if (className != null &amp;&amp; !className.equals("java.lang.Thread") &amp;&amp; !className.equals(this.getClass().getName())) {<a name="line.220"></a>
+<FONT color="green">221</FONT>                returnValue = element;<a name="line.221"></a>
+<FONT color="green">222</FONT>                break;<a name="line.222"></a>
+<FONT color="green">223</FONT>              }<a name="line.223"></a>
+<FONT color="green">224</FONT>            }<a name="line.224"></a>
+<FONT color="green">225</FONT>          }<a name="line.225"></a>
+<FONT color="green">226</FONT>        }<a name="line.226"></a>
+<FONT color="green">227</FONT>        return returnValue;<a name="line.227"></a>
+<FONT color="green">228</FONT>      }<a name="line.228"></a>
+<FONT color="green">229</FONT>      <a name="line.229"></a>
+<FONT color="green">230</FONT>      /**<a name="line.230"></a>
+<FONT color="green">231</FONT>       * Calls the {@link #info(String, Throwable)} method, passing {@code<a name="line.231"></a>
+<FONT color="green">232</FONT>       * null} as the second argument.<a name="line.232"></a>
+<FONT color="green">233</FONT>       *<a name="line.233"></a>
+<FONT color="green">234</FONT>       * @param message the message to log; may be {@code null}<a name="line.234"></a>
+<FONT color="green">235</FONT>       */<a name="line.235"></a>
+<FONT color="green">236</FONT>      @Override<a name="line.236"></a>
+<FONT color="green">237</FONT>      public void info(final String message) {<a name="line.237"></a>
+<FONT color="green">238</FONT>        this.info(message, null);<a name="line.238"></a>
+<FONT color="green">239</FONT>      }<a name="line.239"></a>
+<FONT color="green">240</FONT>      <a name="line.240"></a>
+<FONT color="green">241</FONT>      /**<a name="line.241"></a>
+<FONT color="green">242</FONT>       * Logs the supplied message {@link String} and (optional) {@link<a name="line.242"></a>
+<FONT color="green">243</FONT>       * Throwable} to the underlying {@link Logger} at the {@link<a name="line.243"></a>
+<FONT color="green">244</FONT>       * Level#INFO INFO} level.<a name="line.244"></a>
+<FONT color="green">245</FONT>       *<a name="line.245"></a>
+<FONT color="green">246</FONT>       * @param message the message to log; may be {@code null}<a name="line.246"></a>
+<FONT color="green">247</FONT>       *<a name="line.247"></a>
+<FONT color="green">248</FONT>       * @param throwable the {@link Throwable} to log; may be {@code<a name="line.248"></a>
+<FONT color="green">249</FONT>       * null}<a name="line.249"></a>
+<FONT color="green">250</FONT>       */<a name="line.250"></a>
+<FONT color="green">251</FONT>      @Override<a name="line.251"></a>
+<FONT color="green">252</FONT>      public void info(final String message, final Throwable throwable) {<a name="line.252"></a>
+<FONT color="green">253</FONT>        if (this.logger != null &amp;&amp; this.logger.isLoggable(Level.INFO)) {<a name="line.253"></a>
+<FONT color="green">254</FONT>          final StackTraceElement ste = this.getCaller();<a name="line.254"></a>
+<FONT color="green">255</FONT>          if (throwable == null) {        <a name="line.255"></a>
+<FONT color="green">256</FONT>            this.logger.logp(Level.INFO, ste.getClassName(), ste.getMethodName(), message);<a name="line.256"></a>
+<FONT color="green">257</FONT>          } else {<a name="line.257"></a>
+<FONT color="green">258</FONT>            this.logger.logp(Level.INFO, ste.getClassName(), ste.getMethodName(), message, throwable);<a name="line.258"></a>
+<FONT color="green">259</FONT>          }<a name="line.259"></a>
+<FONT color="green">260</FONT>        }<a name="line.260"></a>
+<FONT color="green">261</FONT>      }<a name="line.261"></a>
+<FONT color="green">262</FONT>      <a name="line.262"></a>
+<FONT color="green">263</FONT>      /**<a name="line.263"></a>
+<FONT color="green">264</FONT>       * Calls the {@link #warning(String, Throwable)} method, passing {@code<a name="line.264"></a>
+<FONT color="green">265</FONT>       * null} as the second argument.<a name="line.265"></a>
+<FONT color="green">266</FONT>       *<a name="line.266"></a>
+<FONT color="green">267</FONT>       * @param message the message to log; may be {@code null}<a name="line.267"></a>
+<FONT color="green">268</FONT>       */<a name="line.268"></a>
+<FONT color="green">269</FONT>      @Override<a name="line.269"></a>
+<FONT color="green">270</FONT>      public void warning(final String message) {<a name="line.270"></a>
+<FONT color="green">271</FONT>        this.warning(message, null);<a name="line.271"></a>
+<FONT color="green">272</FONT>      }<a name="line.272"></a>
+<FONT color="green">273</FONT>      <a name="line.273"></a>
+<FONT color="green">274</FONT>      /**<a name="line.274"></a>
+<FONT color="green">275</FONT>       * Logs the supplied message {@link String} and (optional) {@link<a name="line.275"></a>
+<FONT color="green">276</FONT>       * Throwable} to the underlying {@link Logger} at the {@link<a name="line.276"></a>
+<FONT color="green">277</FONT>       * Level#WARNING WARNING} level.<a name="line.277"></a>
+<FONT color="green">278</FONT>       *<a name="line.278"></a>
+<FONT color="green">279</FONT>       * @param message the message to log; may be {@code null}<a name="line.279"></a>
+<FONT color="green">280</FONT>       *<a name="line.280"></a>
+<FONT color="green">281</FONT>       * @param throwable the {@link Throwable} to log; may be {@code<a name="line.281"></a>
+<FONT color="green">282</FONT>       * null}<a name="line.282"></a>
+<FONT color="green">283</FONT>       */<a name="line.283"></a>
+<FONT color="green">284</FONT>      @Override<a name="line.284"></a>
+<FONT color="green">285</FONT>      public void warning(final String message, final Throwable throwable) {<a name="line.285"></a>
+<FONT color="green">286</FONT>        if (this.logger != null &amp;&amp; this.logger.isLoggable(Level.WARNING)) {<a name="line.286"></a>
+<FONT color="green">287</FONT>          final StackTraceElement ste = this.getCaller();<a name="line.287"></a>
+<FONT color="green">288</FONT>          if (throwable == null) {<a name="line.288"></a>
+<FONT color="green">289</FONT>            this.logger.logp(Level.WARNING, ste.getClassName(), ste.getMethodName(), message);<a name="line.289"></a>
+<FONT color="green">290</FONT>          } else {<a name="line.290"></a>
+<FONT color="green">291</FONT>            this.logger.logp(Level.WARNING, ste.getClassName(), ste.getMethodName(), message, throwable);<a name="line.291"></a>
+<FONT color="green">292</FONT>          }<a name="line.292"></a>
+<FONT color="green">293</FONT>        }<a name="line.293"></a>
+<FONT color="green">294</FONT>      }<a name="line.294"></a>
+<FONT color="green">295</FONT>    <a name="line.295"></a>
+<FONT color="green">296</FONT>      /**<a name="line.296"></a>
+<FONT color="green">297</FONT>       * Calls the {@link #severe(String, Throwable)} method, passing {@code<a name="line.297"></a>
+<FONT color="green">298</FONT>       * null} as the second argument.<a name="line.298"></a>
+<FONT color="green">299</FONT>       *<a name="line.299"></a>
+<FONT color="green">300</FONT>       * @param message the message to log; may be {@code null}<a name="line.300"></a>
+<FONT color="green">301</FONT>       */<a name="line.301"></a>
+<FONT color="green">302</FONT>      @Override<a name="line.302"></a>
+<FONT color="green">303</FONT>      public void severe(final String message) {<a name="line.303"></a>
+<FONT color="green">304</FONT>        this.severe(message, null);<a name="line.304"></a>
+<FONT color="green">305</FONT>      }<a name="line.305"></a>
+<FONT color="green">306</FONT>    <a name="line.306"></a>
+<FONT color="green">307</FONT>      /**<a name="line.307"></a>
+<FONT color="green">308</FONT>       * Logs the supplied message {@link String} and (optional) {@link<a name="line.308"></a>
+<FONT color="green">309</FONT>       * Throwable} to the underlying {@link Logger} at the {@link<a name="line.309"></a>
+<FONT color="green">310</FONT>       * Level#SEVERE SEVERE} level.<a name="line.310"></a>
+<FONT color="green">311</FONT>       *<a name="line.311"></a>
+<FONT color="green">312</FONT>       * @param message the message to log; may be {@code null}<a name="line.312"></a>
+<FONT color="green">313</FONT>       *<a name="line.313"></a>
+<FONT color="green">314</FONT>       * @param throwable the {@link Throwable} to log; may be {@code<a name="line.314"></a>
+<FONT color="green">315</FONT>       * null}<a name="line.315"></a>
+<FONT color="green">316</FONT>       */<a name="line.316"></a>
+<FONT color="green">317</FONT>      @Override<a name="line.317"></a>
+<FONT color="green">318</FONT>      public void severe(final String message, final Throwable throwable) {<a name="line.318"></a>
+<FONT color="green">319</FONT>        if (this.logger != null &amp;&amp; this.logger.isLoggable(Level.SEVERE)) {<a name="line.319"></a>
+<FONT color="green">320</FONT>          final StackTraceElement ste = this.getCaller();<a name="line.320"></a>
+<FONT color="green">321</FONT>          if (throwable == null) {<a name="line.321"></a>
+<FONT color="green">322</FONT>            this.logger.logp(Level.SEVERE, ste.getClassName(), ste.getMethodName(), message);<a name="line.322"></a>
+<FONT color="green">323</FONT>          } else {<a name="line.323"></a>
+<FONT color="green">324</FONT>            this.logger.logp(Level.SEVERE, ste.getClassName(), ste.getMethodName(), message, throwable);<a name="line.324"></a>
+<FONT color="green">325</FONT>          }<a name="line.325"></a>
+<FONT color="green">326</FONT>        }<a name="line.326"></a>
+<FONT color="green">327</FONT>      }<a name="line.327"></a>
+<FONT color="green">328</FONT>    <a name="line.328"></a>
+<FONT color="green">329</FONT>      /**<a name="line.329"></a>
+<FONT color="green">330</FONT>       * Calls the {@link #debug(String, Throwable)} method, passing {@code<a name="line.330"></a>
+<FONT color="green">331</FONT>       * null} as the second argument.<a name="line.331"></a>
+<FONT color="green">332</FONT>       *<a name="line.332"></a>
+<FONT color="green">333</FONT>       * @param message the message to log; may be {@code null}<a name="line.333"></a>
+<FONT color="green">334</FONT>       */<a name="line.334"></a>
+<FONT color="green">335</FONT>      @Override<a name="line.335"></a>
+<FONT color="green">336</FONT>      public void debug(final String message) {<a name="line.336"></a>
+<FONT color="green">337</FONT>        this.debug(message, null);<a name="line.337"></a>
+<FONT color="green">338</FONT>      }<a name="line.338"></a>
+<FONT color="green">339</FONT>    <a name="line.339"></a>
+<FONT color="green">340</FONT>      /**<a name="line.340"></a>
+<FONT color="green">341</FONT>       * Logs the supplied message {@link String} and (optional) {@link<a name="line.341"></a>
+<FONT color="green">342</FONT>       * Throwable} to the underlying {@link Logger} at the {@link<a name="line.342"></a>
+<FONT color="green">343</FONT>       * Level#FINER FINER} level.<a name="line.343"></a>
+<FONT color="green">344</FONT>       *<a name="line.344"></a>
+<FONT color="green">345</FONT>       * @param message the message to log; may be {@code null}<a name="line.345"></a>
+<FONT color="green">346</FONT>       *<a name="line.346"></a>
+<FONT color="green">347</FONT>       * @param throwable the {@link Throwable} to log; may be {@code<a name="line.347"></a>
+<FONT color="green">348</FONT>       * null}<a name="line.348"></a>
+<FONT color="green">349</FONT>       */<a name="line.349"></a>
+<FONT color="green">350</FONT>      @Override<a name="line.350"></a>
+<FONT color="green">351</FONT>      public void debug(final String message, final Throwable throwable) {<a name="line.351"></a>
+<FONT color="green">352</FONT>        if (this.logger != null &amp;&amp; this.logger.isLoggable(Level.FINER)) {<a name="line.352"></a>
+<FONT color="green">353</FONT>          final StackTraceElement ste = this.getCaller();<a name="line.353"></a>
+<FONT color="green">354</FONT>          if (throwable == null) {<a name="line.354"></a>
+<FONT color="green">355</FONT>            this.logger.logp(Level.FINER, ste.getClassName(), ste.getMethodName(), message);<a name="line.355"></a>
+<FONT color="green">356</FONT>          } else {<a name="line.356"></a>
+<FONT color="green">357</FONT>            this.logger.logp(Level.FINER, ste.getClassName(), ste.getMethodName(), message, throwable);<a name="line.357"></a>
+<FONT color="green">358</FONT>          }<a name="line.358"></a>
+<FONT color="green">359</FONT>        }<a name="line.359"></a>
+<FONT color="green">360</FONT>      }<a name="line.360"></a>
+<FONT color="green">361</FONT>      <a name="line.361"></a>
+<FONT color="green">362</FONT>    <a name="line.362"></a>
+<FONT color="green">363</FONT>    }<a name="line.363"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>
