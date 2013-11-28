@@ -36,6 +36,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+
 import liquibase.logging.LogLevel;
 
 import liquibase.logging.core.AbstractLogger;
@@ -76,6 +79,22 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
     levelMap.put(LogLevel.SEVERE, Level.SEVERE);
     levels = Collections.unmodifiableMap(levelMap);
   }
+
+  /**
+   * The {@link DatabaseChangeLog} currently in effect.  This field
+   * may be {@code null} at any point.
+   *
+   * @since 1.2
+   */
+  private transient DatabaseChangeLog changeLog;
+
+  /**
+   * The {@link ChangeSet} currently in effect.  This field may be
+   * {@code null} at any point.
+   *
+   * @since 1.2
+   */
+  private transient ChangeSet changeSet;
 
   /**
    * The underlying {@link Logger} that this {@link
@@ -358,6 +377,87 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
       }
     }
   }
+
+  /**
+   * Stores a reference to the supplied {@link DatabaseChangeLog},
+   * which might be helpful for subclasses that wish to include it in
+   * the logging output.
+   *
+   * <h4>Design Notes</h4>
+   *
+   * <p>Liquibase 3.0.6 and 3.0.7 do not actually make use of this
+   * reference, but mandate that all implementations of the {@link
+   * liquibase.logging.Logger} interface implement this method.</p>
+   *
+   * @param databaseChangeLog the {@link DatabaseChangeLog} that this
+   * {@link JavaUtilLoggingLogger} will be affiliated with; may be
+   * {@code null}
+   *
+   * @see #setChangeSet(ChangeSet)
+   *
+   * @since 1.2
+   */
+  public void setChangeLog(final DatabaseChangeLog databaseChangeLog) {
+    this.changeLog = databaseChangeLog;
+  }
   
+  /**
+   * Returns the {@link DatabaseChangeLog} reference previously set by
+   * a call to the {@link #setChangeLog(DatabaseChangeLog)} method.
+   *
+   * <p>This method may return {@code null}.</p>
+   *
+   * @return a {@link DatabaseChangeLog}, or {@code null}
+   *
+   * @since 1.2
+   */
+  public DatabaseChangeLog getChangeLog() {
+    return this.changeLog;
+  }
+  
+  /**
+   * Returns the {@link ChangeSet} reference previously set by a call
+   * to the {@link #setChangeSet(ChangeSet)} method.
+   *
+   * <p>This method may return {@code null}.</p>
+   *
+   * @return a {@link ChangeSet}, or {@code null}
+   *
+   * @since 1.2
+   */
+  public ChangeSet getChangeSet() {
+    return this.changeSet;
+  }
+
+  /**
+   * Stores a reference to the supplied {@link ChangeSet}, which might
+   * be helpful for subclasses that wish to include it somehow in the
+   * logging output.
+   *
+   *
+   * <h4>Design Notes</h4>
+   *
+   * <p>Liquibase 3.0.6 and 3.0.7 do not actually make use of this
+   * reference, but mandate that all implementations of the {@link
+   * liquibase.logging.Logger} interface implement this method.</p>
+   *
+   * <p>Note that all {@link liquibase.logging.Logger} instances must
+   * also implement the {@code Logger.setChangeLog(DatabaseChangeLog)}
+   * method, even though a {@link DatabaseChangeLog} is reachable from
+   * a {@link ChangeSet}'s {@code ChangeSet.getChangeLog()} method.
+   * It is undefined what should happen if these two {@link
+   * DatabaseChangeLog} references differ at logging time.</p>
+   *
+   * @param changeSet the {@link ChangeSet} that this {@link
+   * JavaUtilLoggingLogger} will be affiliated with; may be {@code
+   * null}
+   *
+   * @see #setChangeLog(DatabaseChangeLog)
+   *
+   * @since 1.2
+   */
+  public void setChangeSet(final ChangeSet changeSet) {
+    this.changeSet = changeSet;
+  }
 
 }

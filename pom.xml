@@ -47,7 +47,7 @@
         <role>architect</role>
         <role>developer</role>
       </roles>
-      <timezone>-5</timezone>
+      <timezone>-8</timezone>
     </developer>
   </developers>
 
@@ -97,6 +97,16 @@
   <build>
     <pluginManagement>
       <plugins>
+
+        <plugin>
+          <groupId>com.github.github</groupId>
+          <artifactId>site-maven-plugin</artifactId>
+          <version>${siteMavenPluginVersion}</version>
+          <configuration>
+            <message>Building site for ${project.artifactId} ${project.version}</message>
+            <server>github</server>
+          </configuration>
+        </plugin>
 
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
@@ -150,11 +160,6 @@
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${mavenJavadocPluginVersion}</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-plugin-plugin</artifactId>
-          <version>${mavenPluginPluginVersion}</version>
         </plugin>
 
         <plugin>
@@ -212,24 +217,6 @@
       </plugins>
     </pluginManagement>
 
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.scm</groupId>
-        <artifactId>maven-scm-manager-plexus</artifactId>
-        <version>${mavenScmManagerPlexusVersion}</version>
-      </extension>
-      <extension>
-        <groupId>org.apache.maven.scm</groupId>
-        <artifactId>maven-scm-provider-gitexe</artifactId>
-        <version>${mavenScmProviderGitexeVersion}</version>
-      </extension>
-      <extension>
-        <groupId>org.kathrynhuxtable.maven.wagon</groupId>
-        <artifactId>wagon-gitsite</artifactId>
-        <version>0.4-SNAPSHOT</version>
-      </extension>
-    </extensions>
-
     <resources>
       <resource>
         <directory>${basedir}/src/main/resources</directory>
@@ -249,29 +236,25 @@
   <properties>
 
     <!-- Versions -->
-    <junitVersion>4.10</junitVersion>
-    <h2Version>1.3.161</h2Version>
+    <junitVersion>4.11</junitVersion>
     <liquibaseVersion>2.0.3</liquibaseVersion>
-    <mavenAssemblyPluginVersion>2.2.1</mavenAssemblyPluginVersion>
-    <mavenCleanPluginVersion>2.4.1</mavenCleanPluginVersion>
-    <mavenCompilerPluginVersion>2.3.2</mavenCompilerPluginVersion>
-    <mavenDependencyPluginVersion>2.2</mavenDependencyPluginVersion>
-    <mavenEnforcerPluginVersion>1.0.1</mavenEnforcerPluginVersion>
+    <mavenAssemblyPluginVersion>2.4</mavenAssemblyPluginVersion>
+    <mavenCleanPluginVersion>2.5</mavenCleanPluginVersion>
+    <mavenCompilerPluginVersion>3.1</mavenCompilerPluginVersion>
+    <mavenDependencyPluginVersion>2.8</mavenDependencyPluginVersion>
+    <mavenEnforcerPluginVersion>1.3.1</mavenEnforcerPluginVersion>
     <mavenGpgPluginVersion>1.4</mavenGpgPluginVersion>
-    <mavenJarPluginVersion>2.3.1</mavenJarPluginVersion>
-    <mavenJavadocPluginVersion>2.8</mavenJavadocPluginVersion>
-    <mavenPluginPluginVersion>2.9</mavenPluginPluginVersion>
-    <mavenProjectInfoReportsPlugin>2.4</mavenProjectInfoReportsPlugin>
-    <mavenReleasePluginVersion>2.2.1</mavenReleasePluginVersion>    
-    <mavenResourcesPluginVersion>2.5</mavenResourcesPluginVersion>
-    <mavenScmManagerPlexusVersion>${mavenScmPluginVersion}</mavenScmManagerPlexusVersion>
-    <mavenScmPluginVersion>1.5</mavenScmPluginVersion>
-    <mavenScmProviderGitexeVersion>${mavenScmPluginVersion}</mavenScmProviderGitexeVersion>
-    <mavenSitePluginVersion>3.0</mavenSitePluginVersion>
-    <mavenSourcePluginVersion>2.1.2</mavenSourcePluginVersion>
-    <mavenSurefirePluginVersion>2.10</mavenSurefirePluginVersion>
-    <versionsMavenPluginVersion>1.2</versionsMavenPluginVersion>
-    <wagonGitsiteVersion>0.4-SNAPSHOT</wagonGitsiteVersion>
+    <mavenJarPluginVersion>2.4</mavenJarPluginVersion>
+    <mavenJavadocPluginVersion>2.9.1</mavenJavadocPluginVersion>
+    <mavenProjectInfoReportsPlugin>2.7</mavenProjectInfoReportsPlugin>
+    <mavenReleasePluginVersion>2.4.2</mavenReleasePluginVersion>    
+    <mavenResourcesPluginVersion>2.6</mavenResourcesPluginVersion>
+    <mavenScmPluginVersion>1.8.1</mavenScmPluginVersion>
+    <mavenSitePluginVersion>3.3</mavenSitePluginVersion>
+    <mavenSourcePluginVersion>2.2.1</mavenSourcePluginVersion>
+    <mavenSurefirePluginVersion>2.16</mavenSurefirePluginVersion>
+    <siteMavenPluginVersion>0.8</siteMavenPluginVersion>
+    <versionsMavenPluginVersion>2.1</versionsMavenPluginVersion>
 
     <!-- Other -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -281,16 +264,21 @@
     <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
     <maven.compiler.source>1.6</maven.compiler.source>
     <maven.compiler.target>1.6</maven.compiler.target>
-    <maven.compiler.verbose>true</maven.compiler.verbose>
 
     <!-- maven-javadoc-plugin Properties -->
     <links>http://docs.oracle.com/javase/6/docs/api/, http://www.liquibase.org/api/, http://kentbeck.github.com/junit/javadoc/latest/</links>
     <sourcetab>2</sourcetab>
     <stylesheet>maven</stylesheet>
 
+    <!-- maven-release-plugin properties -->
+    <goals>deploy,site-deploy</goals>
+
     <!-- maven-resources-plugin Properties -->
     <maven.resources.escapeString>\</maven.resources.escapeString>
     
+    <!-- maven-site-plugin Properties -->
+    <maven.site.deploy.skip>true</maven.site.deploy.skip>
+
     <!-- maven-surefire-plugin Properties -->
     <forkMode>always</forkMode>
     <surefire.useFile>false</surefire.useFile>
