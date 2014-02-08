@@ -272,9 +272,9 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
     if (this.logger != null && this.logger.isLoggable(Level.INFO)) {
       final StackTraceElement ste = this.getCaller();
       if (throwable == null) {        
-        this.logger.logp(Level.INFO, ste.getClassName(), ste.getMethodName(), message);
+        this.logger.logp(Level.INFO, ste.getClassName(), ste.getMethodName(), this.formatMessage(message));
       } else {
-        this.logger.logp(Level.INFO, ste.getClassName(), ste.getMethodName(), message, throwable);
+        this.logger.logp(Level.INFO, ste.getClassName(), ste.getMethodName(), this.formatMessage(message), throwable);
       }
     }
   }
@@ -305,9 +305,9 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
     if (this.logger != null && this.logger.isLoggable(Level.WARNING)) {
       final StackTraceElement ste = this.getCaller();
       if (throwable == null) {
-        this.logger.logp(Level.WARNING, ste.getClassName(), ste.getMethodName(), message);
+        this.logger.logp(Level.WARNING, ste.getClassName(), ste.getMethodName(), this.formatMessage(message));
       } else {
-        this.logger.logp(Level.WARNING, ste.getClassName(), ste.getMethodName(), message, throwable);
+        this.logger.logp(Level.WARNING, ste.getClassName(), ste.getMethodName(), this.formatMessage(message), throwable);
       }
     }
   }
@@ -338,9 +338,9 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
     if (this.logger != null && this.logger.isLoggable(Level.SEVERE)) {
       final StackTraceElement ste = this.getCaller();
       if (throwable == null) {
-        this.logger.logp(Level.SEVERE, ste.getClassName(), ste.getMethodName(), message);
+        this.logger.logp(Level.SEVERE, ste.getClassName(), ste.getMethodName(), this.formatMessage(message));
       } else {
-        this.logger.logp(Level.SEVERE, ste.getClassName(), ste.getMethodName(), message, throwable);
+        this.logger.logp(Level.SEVERE, ste.getClassName(), ste.getMethodName(), this.formatMessage(message), throwable);
       }
     }
   }
@@ -371,11 +371,83 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
     if (this.logger != null && this.logger.isLoggable(Level.FINER)) {
       final StackTraceElement ste = this.getCaller();
       if (throwable == null) {
-        this.logger.logp(Level.FINER, ste.getClassName(), ste.getMethodName(), message);
+        this.logger.logp(Level.FINER, ste.getClassName(), ste.getMethodName(), this.formatMessage(message));
       } else {
-        this.logger.logp(Level.FINER, ste.getClassName(), ste.getMethodName(), message, throwable);
+        this.logger.logp(Level.FINER, ste.getClassName(), ste.getMethodName(), this.formatMessage(message), throwable);
       }
     }
+  }
+  
+  protected String formatMessage(final String message) {
+    final String returnValue;
+    if (message == null) {
+      returnValue = null;
+    } else {
+
+      final String loggerName;
+      if (this.logger == null) {
+        loggerName = null;
+      } else {
+        loggerName = this.logger.getName();
+      }
+
+      final String changeLogName;
+      final DatabaseChangeLog changeLog = this.getChangeLog();
+      if (changeLog == null) {
+        changeLogName = null;
+      } else {
+        changeLogName = changeLog.getFilePath();
+      }
+
+      final String changeSetName;
+      final ChangeSet changeSet = this.getChangeSet();
+      if (changeSet == null) {
+        changeSetName = null;
+      } else {
+        changeSetName = changeSet.toString(false);
+      }
+
+      if (loggerName == null) {
+        if (changeLogName == null) {
+          if (changeSetName == null) {
+            returnValue = message;
+          } else {            
+            final StringBuilder sb = new StringBuilder(changeSetName);
+            sb.append(": ");
+            sb.append(message);
+            returnValue = sb.toString();
+          }
+        } else {
+          final StringBuilder sb = new StringBuilder(changeLogName);
+          sb.append(": ");
+          if (changeSetName != null) {
+            sb.append(changeSetName);
+            sb.append(": ");
+          }
+          sb.append(message);
+          returnValue = sb.toString();
+        }
+      } else {
+        final StringBuilder sb = new StringBuilder(loggerName);
+        sb.append(": ");
+        if (changeLogName == null) {
+          if (changeSetName != null) {
+            sb.append(changeSetName);
+            sb.append(": ");
+          }
+        } else {
+          sb.append(changeLogName);
+          sb.append(": ");
+          if (changeSetName != null) {
+            sb.append(changeSetName);
+            sb.append(": ");
+          }
+        }
+        sb.append(message);
+        returnValue = sb.toString();
+      }
+    }
+    return returnValue;
   }
 
   /**
