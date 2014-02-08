@@ -1,0 +1,10 @@
+<!-- -*- markdown -*- -->
+# Introduction
+
+Welcome to the `${project.artifactId}` project.
+`${project.artifactId}` is a [Liquibase extension][1] that allows
+[Liquibase][2] to log using `java.util.logging` classes.
+
+[1]: https://liquibase.jira.com/wiki/display/CONTRIB/Liquibase+Extensions+Portal
+[2]: http://www.liquibase.org/
+
