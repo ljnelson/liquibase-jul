@@ -377,11 +377,24 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
       }
     }
   }
-  
+
+  /**
+   * Formats a user-supplied log message such that it contains the
+   * same elements separated by the same delimiters as the message
+   * logged by the Liquibase {@link DefaultLogger}.
+   *
+   * <p>This method may return {@code null}.</p>
+   *
+   * @param message the message to format; may be {@code null} in
+   * which case {@code null} will be returned
+   *
+   * @return the formatted message, or {@code null}
+   */
   protected String formatMessage(final String message) {
     final String returnValue;
     if (message == null) {
       returnValue = null;
+
     } else {
 
       final String loggerName;
@@ -455,11 +468,11 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
    * which might be helpful for subclasses that wish to include it in
    * the logging output.
    *
-   * <h4>Design Notes</h4>
+   * <h4>Implementation Notes</h4>
    *
-   * <p>Liquibase 3.0.6 and 3.0.7 do not actually make use of this
-   * reference, but mandate that all implementations of the {@link
-   * liquibase.logging.Logger} interface implement this method.</p>
+   * <p>The {@link Override @Override} annotation is not present on
+   * this method because it is only mandated by Liquibase 3.0.0 and
+   * above.</p>
    *
    * @param databaseChangeLog the {@link DatabaseChangeLog} that this
    * {@link JavaUtilLoggingLogger} will be affiliated with; may be
@@ -506,12 +519,11 @@ public class JavaUtilLoggingLogger extends AbstractLogger {
    * be helpful for subclasses that wish to include it somehow in the
    * logging output.
    *
+   * <h4>Implementation Notes</h4>
    *
-   * <h4>Design Notes</h4>
-   *
-   * <p>Liquibase 3.0.6 and 3.0.7 do not actually make use of this
-   * reference, but mandate that all implementations of the {@link
-   * liquibase.logging.Logger} interface implement this method.</p>
+   * <p>The {@link Override @Override} annotation is not present on
+   * this method because it is only mandated by Liquibase 3.0.0 and
+   * above.</p>
    *
    * <p>Note that all {@link liquibase.logging.Logger} instances must
    * also implement the {@code Logger.setChangeLog(DatabaseChangeLog)}
