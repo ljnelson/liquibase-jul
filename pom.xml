@@ -4,7 +4,7 @@
 
   <groupId>com.edugility</groupId>
   <artifactId>liquibase-jul</artifactId>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
 
   <parent>
     <groupId>org.sonatype.oss</groupId>
@@ -35,6 +35,7 @@
     <connection>scm:git:git@github.com:ljnelson/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:ljnelson/${project.artifactId}.git</developerConnection>
     <url>https://github.com/ljnelson/${project.artifactId}/</url>
+    <tag>liquibase-jul-1.2</tag>
   </scm>
 
   <developers>
