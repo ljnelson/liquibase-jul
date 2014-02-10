@@ -279,7 +279,7 @@
     <stylesheet>maven</stylesheet>
 
     <!-- maven-release-plugin properties -->
-    <goals>deploy,site-deploy</goals>
+    <goals>deploy site-deploy</goals>
 
     <!-- maven-resources-plugin Properties -->
     <maven.resources.escapeString>\</maven.resources.escapeString>
